@@ -23,8 +23,8 @@ const server = z.object({
   DISCORD_CLIENT_SECRET: z.string(),
   PG_PASSWORD:
     process.env.NODE_ENV === "production"
-        ? z.string().min(1)
-        : z.string().min(1).optional(),
+      ? z.string().min(1)
+      : z.string().min(1).optional(),
 });
 
 /**
