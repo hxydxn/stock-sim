@@ -5,6 +5,8 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 
+import { Button } from "~/ui/button";
+
 import { api } from "~/utils/api";
 
 const Home: NextPage = () => {
@@ -21,14 +23,17 @@ const Home: NextPage = () => {
       <body className="min-h-screen bg-gray-900 p-4">
         <nav className="container mx-auto flex flex-wrap items-center justify-between">
           <Link href="/" className="flex items-center">
-            <Image src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg" alt="Rocket logo" width={32} height={32}>
-            </Image>
+            <Image
+              src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg"
+              alt="Rocket logo"
+              width={32}
+              height={32}
+            ></Image>
           </Link>
-          <div className="flex items-center">
-              <p className="mr-2">
-                {hello.data ? hello.data.greeting : "Loading tRPC query..."}
-              </p>
+          <div className="flex items-center space-x-4">
+            <p>{hello.data ? hello.data.greeting : "Loading tRPC query..."}</p>
             <AuthShowcase />
+            <PortfolioButton />
           </div>
         </nav>
         <main className="flex flex-col items-center justify-center">
@@ -77,17 +82,31 @@ const Home: NextPage = () => {
 
 export default Home;
 
+const PortfolioButton: React.FC = () => {
+  const { data: sessionData } = useSession();
+
+  return (
+    <div className={sessionData ? "" : "hidden"}>
+      <Link href="/portfolio">
+      <Button variant="destructive">
+        Portfolio
+      </Button>
+      </Link>
+    </div>
+  );
+};
+
 const AuthShowcase: React.FC = () => {
   const { data: sessionData } = useSession();
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">
-      <button
-        className="rounded-full bg-white/10 px-6 py-2 font-semibold text-white no-underline transition hover:bg-white/20"
+      <Button
+        variant="ghost"
         onClick={sessionData ? () => signOut() : () => signIn()}
       >
         {sessionData ? "Sign out" : "Sign in"}
-      </button>
+      </Button>
     </div>
   );
 };
