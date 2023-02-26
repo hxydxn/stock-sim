@@ -12,7 +12,7 @@ export const appRouter = createTRPCRouter({
     .input(z.object({ text: z.string().nullish() }))
     .query(({ input }) => {
       return {
-        greeting: `Hello from tRPC, ${input.text ?? "Anonymous"}`,
+        greeting: `Welcome, ${input.text ?? "Anonymous"}`,
       };
     }),
   post: postRouter,
