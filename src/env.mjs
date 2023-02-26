@@ -21,7 +21,10 @@ const server = z.object({
   // Add `.min(1) on ID and SECRET if you want to make sure they're not empty
   DISCORD_CLIENT_ID: z.string(),
   DISCORD_CLIENT_SECRET: z.string(),
-  PG_PASSWORD: z.string(),
+  PG_PASSWORD:
+    process.env.NODE_ENV === "production"
+        ? z.string().min(1)
+        : z.string().min(1).optional(),
 });
 
 /**
