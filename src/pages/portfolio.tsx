@@ -2,6 +2,7 @@ import { Controller } from "react-hook-form";
 import { z } from "zod";
 
 import { TransactionCategory } from "@prisma/client";
+import { BalanceCategory } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "~/ui/avatar";
 import { Button } from "~/ui/button";
@@ -30,7 +31,8 @@ import { useZodForm } from "~/utils/zod-form";
 
 // This schema is reused on the backend
 export const balanceUpdateSchema = z.object({
-  balance: z.number().min(0.01).multipleOf(0.01),
+  amount: z.number().min(0.01).multipleOf(0.01),
+  type: z.nativeEnum(BalanceCategory),
 });
 
 // This schema is reused on the backend

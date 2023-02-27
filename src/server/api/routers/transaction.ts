@@ -4,17 +4,19 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 
 export const transactionRouter = createTRPCRouter({
-  getAll: publicProcedure.query(({ ctx }) => {
+  getAll: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.transaction.findMany({
       orderBy: {
         createdAt: "desc",
       },
-      include: { user: true },
+      where: {
+        userId: ctx.session.user.id,
+      },
     });
   }),
 
   delete: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.string().cuid() }))
     .mutation(({ ctx, input }) => {
       return ctx.prisma.transaction.delete({
         where: {
@@ -31,6 +33,12 @@ export const transactionRouter = createTRPCRouter({
         where: {
           userId: ctx.session.user.id,
           stock: input.stock,
+        },
+      });
+      const currentBalance = await ctx.prisma.user.findFirst({
+        select: { balance: true, id: true },
+        where: {
+          id: ctx.session.user.id,
         },
       });
 
@@ -55,7 +63,21 @@ export const transactionRouter = createTRPCRouter({
             amount: currentAmount.amount - input.amount,
           },
         });
+        await ctx.prisma.user.update({
+          where: {
+            id: currentBalance.id,
+          },
+          data: {
+            balance: currentBalance.balance + input.amount * input.price,
+          },
+        });
       } else if (input.type === "BUY") {
+        if (currentBalance.balance < input.amount * input.price) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "You don't have enough money to buy this stock.",
+          });
+        }
         if (currentAmount) {
           await ctx.prisma.possesion.update({
             where: {
@@ -68,7 +90,7 @@ export const transactionRouter = createTRPCRouter({
         } else {
           await ctx.prisma.possesion.create({
             data: {
-              userId: ctx.session.user.id,
+              user: { connect: { id: ctx.session.user.id } },
               stock: input.stock,
               amount: input.amount,
             },

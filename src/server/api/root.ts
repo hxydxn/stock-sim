@@ -1,5 +1,8 @@
 import { z } from "zod";
 import { postRouter } from "./routers/post";
+import { transactionRouter } from "./routers/transaction";
+import { possessionRouter } from "./routers/possession";
+import { balanceRouter } from "./routers/balance";
 import { createTRPCRouter, publicProcedure } from "./trpc";
 
 /**
@@ -16,6 +19,9 @@ export const appRouter = createTRPCRouter({
       };
     }),
   post: postRouter,
+  transaction: transactionRouter,
+  possession: possessionRouter,
+  balance: balanceRouter,
 });
 
 // export type definition of API

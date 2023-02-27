@@ -25,6 +25,11 @@ enum TransactionCategory {
   SELL
 }
 
+enum BalanceCategory {
+  DEPOSIT
+  WITHDRAW
+}
+
 model Post {
   id       String       @id @default(cuid())
   title    String
@@ -71,11 +76,20 @@ model User {
   image         String
   accounts      Account[]
   sessions      Session[]
-  balance       Decimal       @default(100000.00)
+  balance       Float         @default(100000.00)
   Post          Post[]
   transactions  Transaction[]
-  possesions    Possesion[]
+  possessions   Possession[]
+  balanceId     Int
 }
+
+// model Balance {
+//   id         String   @id @default(cuid())
+//   balance    Float    @default(100000.00)
+//   ModifiedAt DateTime @default(now())
+//   userId     String   @unique
+//   user       User     @relation(fields: [userId], references: [id])
+// }
 
 model Transaction {
   id        String              @id @default(cuid())
@@ -88,7 +102,7 @@ model Transaction {
   user      User                @relation(fields: [userId], references: [id])
 }
 
-model Possesion {
+model Possession {
   id        Int      @id @default(autoincrement())
   stock     String
   amount    Int
