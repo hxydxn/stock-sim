@@ -23,9 +23,6 @@ enum PostCategory {
 enum TransactionCategory {
   BUY
   SELL
-}
-
-enum BalanceCategory {
   DEPOSIT
   WITHDRAW
 }

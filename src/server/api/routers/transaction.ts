@@ -28,7 +28,7 @@ export const transactionRouter = createTRPCRouter({
   create: protectedProcedure
     .input(transactionCreateSchema)
     .mutation(async ({ ctx, input }) => {
-      const currentAmount = await ctx.prisma.possesion.findFirst({
+      const currentAmount = await ctx.prisma.possession.findFirst({
         select: { amount: true, id: true },
         where: {
           userId: ctx.session.user.id,
@@ -42,7 +42,12 @@ export const transactionRouter = createTRPCRouter({
         },
       });
 
-      if (input.type === "SELL") {
+      if (input.type === "DEPOSIT" || input.type === "WITHDRAW") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Use the balance router to deposit or withdraw money",
+        });
+      } else if (input.type === "SELL") {
         if (!currentAmount) {
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -55,7 +60,13 @@ export const transactionRouter = createTRPCRouter({
             message: `You don't own ${input.amount} of this stock.`,
           });
         }
-        await ctx.prisma.possesion.update({
+        if (!currentBalance) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "User not found",
+          });
+        }
+        await ctx.prisma.possession.update({
           where: {
             id: currentAmount.id,
           },
@@ -72,6 +83,12 @@ export const transactionRouter = createTRPCRouter({
           },
         });
       } else if (input.type === "BUY") {
+        if (!currentBalance) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "User not found",
+          });
+        }
         if (currentBalance.balance < input.amount * input.price) {
           throw new TRPCError({
             code: "BAD_REQUEST",
@@ -79,7 +96,7 @@ export const transactionRouter = createTRPCRouter({
           });
         }
         if (currentAmount) {
-          await ctx.prisma.possesion.update({
+          await ctx.prisma.possession.update({
             where: {
               id: currentAmount.id,
             },
@@ -88,7 +105,7 @@ export const transactionRouter = createTRPCRouter({
             },
           });
         } else {
-          await ctx.prisma.possesion.create({
+          await ctx.prisma.possession.create({
             data: {
               user: { connect: { id: ctx.session.user.id } },
               stock: input.stock,

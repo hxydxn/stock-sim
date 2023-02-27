@@ -4,7 +4,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 
 export const balanceRouter = createTRPCRouter({
-  byUser: protectedProcedure.query(async ({ ctx }) => {
+  byUser: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.user.findFirst({
       where: {
         id: ctx.session.user.id,
@@ -14,7 +14,7 @@ export const balanceRouter = createTRPCRouter({
       },
     });
   }),
-  
+
   update: protectedProcedure
     .input(balanceUpdateSchema)
     .mutation(async ({ ctx, input }) => {
@@ -34,7 +34,12 @@ export const balanceRouter = createTRPCRouter({
         });
       }
 
-      if (input.type === "deposit") {
+      if (input.type === "BUY" || input.type === "SELL") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Use the transaction router to buy or sell stocks",
+        });
+      } else if (input.type === "DEPOSIT") {
         return ctx.prisma.user.update({
           where: {
             id: ctx.session.user.id,
@@ -43,7 +48,7 @@ export const balanceRouter = createTRPCRouter({
             balance: currentBalance.balance + input.amount,
           },
         });
-      } else if (input.type === "withdraw") {
+      } else if (input.type === "WITHDRAW") {
         if (currentBalance.balance < input.amount) {
           throw new TRPCError({
             code: "BAD_REQUEST",
