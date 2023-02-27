@@ -35,8 +35,9 @@ export const balanceUpdateSchema = z.object({
 
 // This schema is reused on the backend
 export const transactionCreateSchema = z.object({
-  amount: z.int().min(1),
-  price: z.number().min(0.01).multipleOf(0.01),
+  stock: z.string().min(1).max(6),
+  amount: z.number().int().positive(),
+  price: z.number().positive().multipleOf(0.01),
   type: z.nativeEnum(TransactionCategory),
 });
 

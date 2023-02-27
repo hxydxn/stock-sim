@@ -2,86 +2,97 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
+  // Further reading:
+  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
+  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+  url      = env("DATABASE_URL")
 }
 
 enum PostCategory {
-    BUSINESS
-    DESIGN
-    ENGINEERING
+  BUSINESS
+  DESIGN
+  ENGINEERING
 }
 
 enum TransactionCategory {
-    BUY
-    SELL
+  BUY
+  SELL
 }
 
 model Post {
-    id       String       @id @default(cuid())
-    title    String
-    body     String
-    category PostCategory
+  id       String       @id @default(cuid())
+  title    String
+  body     String
+  category PostCategory
 
-    authorId  String
-    author    User     @relation(fields: [authorId], references: [id])
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Account {
-    id                String  @id @default(cuid())
-    userId            String
-    type              String
-    provider          String
-    providerAccountId String
-    refresh_token     String? @db.Text
-    access_token      String? @db.Text
-    expires_at        Int?
-    token_type        String?
-    scope             String?
-    id_token          String? @db.Text
-    session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String
-    email         String    @unique
-    emailVerified DateTime?
-    image         String
-    accounts      Account[]
-    sessions      Session[]
-    balance       Decimal   @default(0.00)
-    Post          Post[]
-    Transaction   Transaction[]
+  id            String        @id @default(cuid())
+  name          String
+  email         String        @unique
+  emailVerified DateTime?
+  image         String
+  accounts      Account[]
+  sessions      Session[]
+  balance       Decimal       @default(100000.00)
+  Post          Post[]
+  transactions  Transaction[]
+  possesions    Possesion[]
 }
 
 model Transaction {
-    id        String   @id @default(cuid())
-    amount    Int
-    price     Decimal
-    type      TransactionCategory
-    createdAt DateTime @default(now())
-    userId    String
-    user      User     @relation(fields: [userId], references: [id])
+  id        String              @id @default(cuid())
+  stock     String
+  amount    Int
+  price     Float
+  type      TransactionCategory
+  createdAt DateTime            @default(now())
+  userId    String
+  user      User                @relation(fields: [userId], references: [id])
+}
+
+model Possesion {
+  id        Int      @id @default(autoincrement())
+  stock     String
+  amount    Int
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
 }
