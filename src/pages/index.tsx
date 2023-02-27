@@ -9,7 +9,7 @@ import { Button } from "~/ui/button";
 
 import { api } from "~/utils/api";
 
-import { createChart } from 'lightweight-charts';
+import { createChart } from "lightweight-charts";
 
 const Home: NextPage = () => {
   const { data: session } = useSession();
