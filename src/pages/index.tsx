@@ -9,6 +9,8 @@ import { Button } from "~/ui/button";
 
 import { api } from "~/utils/api";
 
+import { createChart } from 'lightweight-charts';
+
 const Home: NextPage = () => {
   const { data: session } = useSession();
   const hello = api.hello.useQuery({ text: session?.user.name });

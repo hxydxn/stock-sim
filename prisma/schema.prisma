@@ -20,6 +20,11 @@ enum PostCategory {
     ENGINEERING
 }
 
+enum TransactionCategory {
+    BUY
+    SELL
+}
+
 model Post {
     id       String       @id @default(cuid())
     title    String
@@ -67,6 +72,16 @@ model User {
     accounts      Account[]
     sessions      Session[]
     balance       Decimal   @default(0.00)
-    shares        Int       @default(0)
     Post          Post[]
+    Transaction   Transaction[]
+}
+
+model Transaction {
+    id        String   @id @default(cuid())
+    amount    Int
+    price     Decimal
+    type      TransactionCategory
+    createdAt DateTime @default(now())
+    userId    String
+    user      User     @relation(fields: [userId], references: [id])
 }
