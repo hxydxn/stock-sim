@@ -77,7 +77,6 @@ model User {
   Post          Post[]
   transactions  Transaction[]
   possessions   Possession[]
-  balanceId     Int
 }
 
 // model Balance {

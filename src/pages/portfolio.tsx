@@ -69,7 +69,28 @@ function CreateAccountBalance() {
 
   return (
     <div className="mx-auto max-w-xl space-y-8">
-      <form action="" className="flex flex-col gap-4" onSubmit={onSubmit}>
+      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
+        <h1 className="text-4xl font-bold">Portfolio</h1>
+        <div className="flex w-full flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20">
+          <h3 className="text-center text-2xl font-bold">
+            Total Portfolio Value
+          </h3>
+        </div>
+        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
+          <div className="flex max-w-md flex-col rounded-xl bg-white/10 p-4 hover:bg-white/20">
+            <h3 className="text-center text-xl font-bold">Current Balance</h3>
+          </div>
+          <div className="flex max-w-md flex-col rounded-xl bg-white/10 p-4 hover:bg-white/20">
+            <h3 className="text-center text-xl font-bold">
+              Current Shares Held
+            </h3>
+          </div>
+        </div>
+        <div className="flex w-full flex-col rounded-xl bg-white/10 p-4">
+          <h3 className="text-center text-2xl font-bold">Past Transactions</h3>
+        </div>
+      </div>
+      {/* <form action="" className="flex flex-col gap-4" onSubmit={onSubmit}>
         <div className="space-y-1">
           <Label htmlFor="name">Title</Label>
           <Input
@@ -125,75 +146,44 @@ function CreateAccountBalance() {
             : "Post"}
         </Button>
         <p className="font-medium text-red-500">{createPost.error?.message}</p>
-      </form>
+      </form> */}
     </div>
   );
 }
 
-function PostCard(props: { post: RouterOutputs["post"]["getAll"][number] }) {
+function TransactionCard(props: {
+  transaction: RouterOutputs["transaction"]["getAll"][number];
+}) {
   const { data: session } = useSession();
-  const { post } = props;
+  const { transaction } = props;
   const utils = api.useContext();
-  const deletePost = api.post.delete.useMutation({
-    onSettled: async () => {
-      await utils.post.invalidate();
-    },
-  });
+
   return (
     <div className="flex flex-row rounded-lg bg-white/10 p-4 transition-all hover:scale-[101%]">
-      <Avatar className="mr-2 self-center">
-        <AvatarImage src={post.author.image} alt="@shadcn" />
-        <AvatarFallback>{post.author.name.substring(0, 2)}</AvatarFallback>
-      </Avatar>
       <div className="flex-grow">
-        <h2 className="text-2xl font-bold">{post.title}</h2>
-        <p className="mt-2 text-sm">{post.body}</p>
+        <div className="flex flex-row justify-between">
+          <h2 className="text-2xl font-bold">{transaction.stock}</h2>
+          <h1 className="text-gray text-xl font-bold">{transaction.type}</h1>
+        </div>
+        <p className="mt-2 text-sm">
+          {transaction.amount} shares @ {transaction.price}
+        </p>
       </div>
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button
-            variant="destructive"
-            data-testid={`delete-post-${post.title}`}
-          >
-            Delete
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Post</DialogTitle>
-            <DialogClose />
-          </DialogHeader>
-          <DialogDescription>
-            Are you sure you want to delete this post? This action cannot be
-            reverted.
-          </DialogDescription>
-
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button
-                variant="destructive"
-                disabled={!session}
-                onClick={() => deletePost.mutate({ id: post.id })}
-              >
-                Delete
-              </Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
 
 export default function PortfolioPage() {
-  const { data: posts } = api.post.getAll.useQuery();
+  const { data: transactions } = api.transaction.getAll.useQuery();
+  const { data: balance } = api.balance.byUser.useQuery();
+  const { data: possessions } = api.possession.byUser.useQuery();
 
   return (
     <main className="container mx-auto py-16">
       <CreateAccountBalance />
       <div className="mx-auto mt-4 flex max-w-xl flex-col gap-4">
-        {posts?.map((post) => (
-          <PostCard key={post.id} post={post} />
+        {transactions?.map((transaction) => (
+          <TransactionCard key={transaction.id} transaction={transaction} />
         ))}
       </div>
     </main>
