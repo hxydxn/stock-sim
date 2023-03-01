@@ -43,7 +43,7 @@ specifiers:
   react-hook-form: ^7.43.2
   react-ts-tradingview-widgets: ^1.0.14
   recharts: ^2.4.3
-  start-server-and-test: ^1.15.5
+  start-server-and-test: ^2.0.0
   superjson: 1.9.1
   tailwind-merge: ^1.10.0
   tailwindcss: ^3.2.7
@@ -102,7 +102,7 @@ devDependencies:
   prettier: 2.8.4
   prettier-plugin-tailwindcss: 0.2.3_prettier@2.8.4
   prisma: 4.11.0
-  start-server-and-test: 1.15.5
+  start-server-and-test: 2.0.0
   tailwindcss: 3.2.7_postcss@8.4.21
   typescript: 4.9.5
   vite: 3.2.5_@types+node@18.14.2
@@ -4204,10 +4204,9 @@ packages:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
     dev: true
 
-  /start-server-and-test/1.15.5:
-    resolution: {integrity: sha512-o3EmkX0++GV+qsvIJ/OKWm3w91fD8uS/bPQVPrh/7loaxkpXSuAIHdnmN/P/regQK9eNAK76aBJcHt+OSTk+nA==}
+  /start-server-and-test/2.0.0:
+    resolution: {integrity: sha512-UqKLw0mJbfrsG1jcRLTUlvuRi9sjNuUiDOLI42r7R5fA9dsFoywAy9DoLXNYys9B886E4RCKb+qM1Gzu96h7DQ==}
     engines: {node: '>=6'}
-    deprecated: this package has been deprecated
     hasBin: true
     dependencies:
       arg: 5.0.2
