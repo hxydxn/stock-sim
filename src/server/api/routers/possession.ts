@@ -7,6 +7,11 @@ export const possessionRouter = createTRPCRouter({
       where: {
         userId: ctx.session.user.id,
       },
+      select: {
+        amount: true,
+        id: true,
+        stock: true,
+      },
     });
   }),
 });
