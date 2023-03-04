@@ -147,14 +147,6 @@ const TransactButton: React.FC = () => {
     },
   );
 
-  const addCurrPrice = async () => {
-    // const response = await fetch(
-    //   `https://api.polygon.io/v2/aggs/ticker/GME/prev?adjusted=true&apiKey=axqvyaD1YqGAM0v6sQ4KvbWju7oAZ7L9`,
-    // );
-    // const data = await response.json();
-    // methods.setValue("price", data.results[0].c);
-  };
-
   return (
     <div className={"container max-w-xs items-center"}>
       <form action="" className="flex flex-col gap-4" onSubmit={onSubmit}>

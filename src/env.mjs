@@ -23,7 +23,6 @@ const server = z.object({
   DISCORD_CLIENT_SECRET: z.string(),
   PG_PASSWORD: z.string(),
   POLYGON_API_KEY: z.string(),
-  FINNHUB_API_KEY: z.string(),
 });
 
 /**
@@ -49,7 +48,6 @@ const processEnv = {
   DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
   PG_PASSWORD: process.env.PG_PASSWORD,
   POLYGON_API_KEY: process.env.POLYGON_API_KEY,
-  FINNHUB_API_KEY: process.env.FINNHUB_API_KEY,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 };
 

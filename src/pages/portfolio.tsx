@@ -1,9 +1,6 @@
-import { Controller } from "react-hook-form";
 import { z } from "zod";
-
 import { TransactionCategory } from "@prisma/client";
 import { signIn, signOut, useSession } from "next-auth/react";
-import { Avatar, AvatarFallback, AvatarImage } from "~/ui/avatar";
 import { Button } from "~/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -26,8 +23,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/ui/select";
-import { Textarea } from "~/ui/text-area";
 import { api, type RouterOutputs } from "~/utils/api";
+import { balanceRouter } from "~/server/api/routers/balance";
+import { useZodForm } from "~/utils/zod-form";
+import { Controller } from "react-hook-form";
 
 // This schema is reused on the backend
 export const balanceUpdateSchema = z.object({
@@ -52,6 +51,30 @@ export const transactionPutSchema = z.object({
 function CreateAccountBalance() {
   const { data: balance } = api.balance.byUser.useQuery();
   const { data: possessions } = api.possession.byUser.useQuery();
+
+  const methods = useZodForm({
+    schema: balanceUpdateSchema,
+  });
+
+  const utils = api.useContext();
+
+  const editBalance = api.balance.update.useMutation({
+    onSettled: async () => {
+      await utils.balance.invalidate();
+      methods.reset();
+    },
+  });
+
+  const onSubmit = methods.handleSubmit(
+    (data) => {
+      editBalance.mutate(data);
+    },
+    (e) => {
+      console.log("Whoops... something went wrong!");
+      console.error(e);
+    },
+  );
+
   // const totalStockVal = possessions?.forEach((possession) => {
   //   possession.amount * possession.stock.price
   // }, 0);
@@ -72,6 +95,46 @@ function CreateAccountBalance() {
           <div className="flex max-w-md flex-col rounded-xl bg-white/10 p-4 hover:bg-white/20">
             <h3 className="text-center text-xl font-bold">Current Balance</h3>
             <p className="text-center">${balance?.balance}</p>
+            <form onSubmit={onSubmit} className="flex flex-col gap-4">
+              <div className="space-y-1">
+                <Label htmlFor="amount">Amount</Label>
+                <Input
+                  id="amount"
+                  {...methods.register("amount", { valueAsNumber: true })}
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                />
+                <p className="font-medium text-red-500">
+                  {methods.formState.errors?.amount?.message}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <Label>Type</Label>
+                <Controller
+                  control={methods.control}
+                  name="type"
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="bg-slate-800">
+                        <SelectValue placeholder="Type of Transaction" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="DEPOSIT">Deposit</SelectItem>
+                        <SelectItem value="WITHDRAW">Withdraw</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <p className="font-medium text-red-500">
+                  {methods.formState.errors?.type?.message}
+                </p>
+              </div>
+              <Button type="submit">Update Balance</Button>
+              <p className="font-medium text-red-500">
+                {editBalance.error?.message}
+              </p>
+            </form>
           </div>
           <div className="flex max-w-md flex-col rounded-xl bg-white/10 p-4 hover:bg-white/20">
             <h3 className="text-center text-xl font-bold">
