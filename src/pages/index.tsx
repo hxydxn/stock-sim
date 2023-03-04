@@ -1,4 +1,3 @@
-import { Book } from "lucide-react";
 import { type NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
@@ -12,9 +11,9 @@ import { Input } from "~/ui/input";
 import { useZodForm } from "~/utils/zod-form";
 import { z } from "zod";
 import { TransactionCategory } from "@prisma/client";
-import { transactionCreateSchema } from "./portfolio";
+import { transactionCreateSchema, transactionPutSchema } from "./portfolio";
 
-import PolygonAdapter from "@polygon.io/tradingview-adapter";
+// import PolygonAdapter from "@polygon.io/tradingview-adapter";
 import TradingView from "lightweight-charts";
 import {
   CartesianGrid,
@@ -28,6 +27,15 @@ import {
 import { useEffect, useRef } from "react";
 
 import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
+import { Label } from "~/ui/label";
+import { Controller } from "react-hook-form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/ui/select";
 
 // const client = new PolygonAdapter({
 //   apikey: "axqvyaD1YqGAM0v6sQ4KvbWju7oAZ7L9",
@@ -77,9 +85,10 @@ const Home: NextPage = () => {
             details={false}
           ></AdvancedRealTimeChart>
         </div>
-        <div className="flex-row items-center space-x-8 py-12">
-          <BuyButton />
-          <SellButton />
+        <div className="center  p-12">
+          <div className="flex max-w-md flex-col">
+            <TransactButton />
+          </div>
         </div>
       </main>
     </>
@@ -115,42 +124,98 @@ const AuthShowcase: React.FC = () => {
   );
 };
 
-const BuyButton: React.FC = () => {
+const TransactButton: React.FC = () => {
   const methods = useZodForm({
-    schema: transactionCreateSchema,
+    schema: transactionPutSchema,
   });
-  const { data: sessionData } = useSession();
+  const { data: session } = useSession();
+  const utils = api.useContext();
+  const createTransaction = api.transaction.create.useMutation({
+    onSettled: async () => {
+      await utils.transaction.invalidate();
+      methods.reset();
+    },
+  });
 
-  return (
-    <div className={sessionData ? "container items-center" : "hidden"}>
-      <Input
-        id="name"
-        className="bg-slate-800"
-        {...methods.register("title")}
-      />
-      <p className="font-medium text-red-500">
-        {methods.formState.errors?.title?.message}
-      </p>
-      <Button size="lg" variant="primary" onClick={}>
-        BUY
-      </Button>
-    </div>
+  const onSubmit = methods.handleSubmit(
+    (data) => {
+      createTransaction.mutate(data);
+    },
+    (e) => {
+      console.log("Whoops... something went wrong!");
+      console.error(e);
+    },
   );
-};
 
-const SellButton: React.FC = () => {
-  const methods = useZodForm({
-    schema: transactionCreateSchema,
-  });
-  const { data: sessionData } = useSession();
+  const addCurrPrice = async () => {
+    // const response = await fetch(
+    //   `https://api.polygon.io/v2/aggs/ticker/GME/prev?adjusted=true&apiKey=axqvyaD1YqGAM0v6sQ4KvbWju7oAZ7L9`,
+    // );
+    // const data = await response.json();
+    // methods.setValue("price", data.results[0].c);
+  };
 
   return (
-    <Button
-      size="lg"
-      variant="destructive"
-      className={sessionData ? "" : "hidden"}
-    >
-      SELL
-    </Button>
+    <div className={"container max-w-xs items-center"}>
+      <form action="" className="flex flex-col gap-4" onSubmit={onSubmit}>
+        <div className="space-y-1">
+          <Label htmlFor="name">Stock Ticker</Label>
+          <Input
+            id="stock"
+            className="bg-slate-800"
+            value={"GME"}
+            {...methods.register("stock")}
+          />
+          <p className="font-medium text-red-500">
+            {methods.formState.errors?.stock?.message}
+          </p>
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="name">Amount (# of Shares)</Label>
+          <Input
+            id="amount"
+            className="bg-slate-800"
+            {...methods.register("amount", { valueAsNumber: true })}
+          />
+          <p className="font-medium text-red-500">
+            {methods.formState.errors?.amount?.message}
+          </p>
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="category">Category</Label>
+          <Controller
+            control={methods.control}
+            name="type"
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger className="bg-slate-800">
+                  <SelectValue placeholder="Type of Transaction" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="BUY">Buy</SelectItem>
+                  <SelectItem value="SELL">Sell</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
+          <p className="font-medium text-red-500">
+            {methods.formState.errors?.type?.message}
+          </p>
+        </div>
+
+        <Button size="lg" type="submit" disabled={!session}>
+          {!session
+            ? "Sign in to Buy/Sell"
+            : createTransaction.isLoading
+            ? "Loading..."
+            : "Transact"}
+        </Button>
+        <p className="font-medium text-red-500">
+          {createTransaction.error?.message}
+        </p>
+      </form>
+    </div>
   );
 };

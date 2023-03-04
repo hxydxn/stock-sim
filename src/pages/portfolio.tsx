@@ -43,6 +43,12 @@ export const transactionCreateSchema = z.object({
   type: z.nativeEnum(TransactionCategory),
 });
 
+export const transactionPutSchema = z.object({
+  stock: z.string().min(1).max(6),
+  amount: z.number().int().positive(),
+  type: z.nativeEnum(TransactionCategory),
+});
+
 function CreateAccountBalance() {
   const { data: balance } = api.balance.byUser.useQuery();
   const { data: possessions } = api.possession.byUser.useQuery();

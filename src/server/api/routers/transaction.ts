@@ -1,7 +1,29 @@
 import { z } from "zod";
-import { transactionCreateSchema } from "~/pages/portfolio";
+import { transactionPutSchema } from "~/pages/portfolio";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { restClient } from "@polygon.io/client-js";
+
+export const polygon = async (symbol: string) => {
+  const rest = restClient(process.env.POLYGON_API_KEY);
+  try {
+    const response = await rest.stocks.previousClose(symbol);
+    // Get the previous close price as a number
+    const previousClose = response.results[0].c;
+    if (previousClose) {
+      return previousClose;
+    }
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "No previous close price found",
+    });
+  } catch (error) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "429 Too Many Requests",
+    });
+  }
+};
 
 export const transactionRouter = createTRPCRouter({
   getAll: protectedProcedure.query(({ ctx }) => {
@@ -26,8 +48,9 @@ export const transactionRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(transactionCreateSchema)
+    .input(transactionPutSchema)
     .mutation(async ({ ctx, input }) => {
+      const price = await polygon(input.stock);
       const currentAmount = await ctx.prisma.possession.findFirst({
         select: { amount: true, id: true },
         where: {
@@ -79,7 +102,7 @@ export const transactionRouter = createTRPCRouter({
             id: currentBalance.id,
           },
           data: {
-            balance: currentBalance.balance + input.amount * input.price,
+            balance: currentBalance.balance + input.amount * price,
           },
         });
       } else if (input.type === "BUY") {
@@ -89,7 +112,7 @@ export const transactionRouter = createTRPCRouter({
             message: "User not found",
           });
         }
-        if (currentBalance.balance < input.amount * input.price) {
+        if (currentBalance.balance < input.amount * price) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "You don't have enough money to buy this stock.",
@@ -120,7 +143,7 @@ export const transactionRouter = createTRPCRouter({
           type: input.type,
           stock: input.stock,
           amount: input.amount,
-          price: input.price,
+          price: price,
           user: { connect: { id: ctx.session.user.id } },
         },
       });
