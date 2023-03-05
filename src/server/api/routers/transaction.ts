@@ -132,6 +132,15 @@ export const transactionRouter = createTRPCRouter({
                             amount: currentAmount.amount + input.amount,
                         },
                     });
+                    await ctx.prisma.user.update({
+                        where: {
+                            id: currentBalance.id,
+                        },
+                        data: {
+                            balance:
+                                currentBalance.balance - input.amount * price,
+                        },
+                    });
                 } else {
                     await ctx.prisma.possession.create({
                         data: {
