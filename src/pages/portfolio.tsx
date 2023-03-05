@@ -1,19 +1,7 @@
-import { z } from "zod";
-import { TransactionCategory } from "@prisma/client";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { Button } from "~/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "~/ui/dialog";
 import { Input } from "~/ui/input";
 import { Label } from "~/ui/label";
 import {
@@ -26,34 +14,7 @@ import {
 import { api, type RouterOutputs } from "~/utils/api";
 import { useZodForm } from "~/utils/zod-form";
 import { Controller } from "react-hook-form";
-import { createChart } from "lightweight-charts";
-import { useEffect, useRef } from "react";
-
-enum HistorySpanProto {
-    WEEK,
-    MONTH,
-    DAY,
-}
-
-// This schema is reused on the backend
-export const balanceUpdateSchema = z.object({
-    amount: z.number().min(0.01).multipleOf(0.01),
-    type: z.nativeEnum(TransactionCategory),
-});
-
-// This schema is reused on the backend
-export const transactionCreateSchema = z.object({
-    stock: z.string().min(1).max(6),
-    amount: z.number().int().positive(),
-    price: z.number().positive().multipleOf(0.01),
-    type: z.nativeEnum(TransactionCategory),
-});
-
-export const transactionPutSchema = z.object({
-    stock: z.string().min(1).max(6),
-    amount: z.number().int().positive(),
-    type: z.nativeEnum(TransactionCategory),
-});
+import { balanceUpdateSchema } from "~/server/api/types/balance";
 
 function CreateAccountBalance() {
     const { data: balance } = api.balance.byUser.useQuery();
@@ -85,9 +46,6 @@ function CreateAccountBalance() {
     const { data: portfolioVal } =
         api.transaction.getTotalPortfolioVal.useQuery();
 
-    // const totalVal = balance?.balance + possessions?.forEach((possession) => {
-    //   possession.amount * possession.stock.price
-    // }, 0)
     return (
         <div className="mx-auto max-w-xl">
             <div className="container flex flex-col items-center justify-center gap-12 px-4 pt-16 pb-8 ">

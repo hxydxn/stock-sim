@@ -26,19 +26,6 @@ enum TransactionCategory {
   DEPOSIT
   WITHDRAW
 }
-
-model Post {
-  id       String       @id @default(cuid())
-  title    String
-  body     String
-  category PostCategory
-
-  authorId  String
-  author    User     @relation(fields: [authorId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -74,7 +61,6 @@ model User {
   accounts      Account[]
   sessions      Session[]
   balance       Float         @default(100000.00)
-  Post          Post[]
   transactions  Transaction[]
   possessions   Possession[]
 }
@@ -97,4 +83,6 @@ model Possession {
   createdAt DateTime @default(now())
   userId    String
   user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, stock])
 }

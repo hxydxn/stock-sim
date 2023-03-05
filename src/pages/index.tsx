@@ -9,22 +9,9 @@ import { Button } from "~/ui/button";
 import { api } from "~/utils/api";
 import { Input } from "~/ui/input";
 import { useZodForm } from "~/utils/zod-form";
-import { z } from "zod";
-import { TransactionCategory } from "@prisma/client";
-import { transactionCreateSchema, transactionPutSchema } from "./portfolio";
+import { transactionPutSchema } from "~/server/api/types/transaction";
 
-// import PolygonAdapter from "@polygon.io/tradingview-adapter";
-import TradingView from "lightweight-charts";
-import {
-    CartesianGrid,
-    Line,
-    LineChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from "recharts";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
 import { Label } from "~/ui/label";
@@ -37,8 +24,21 @@ import {
     SelectValue,
 } from "~/ui/select";
 
+type IntervalType =
+    | "1"
+    | "3"
+    | "5"
+    | "15"
+    | "30"
+    | "60"
+    | "120"
+    | "180"
+    | "240"
+    | "D"
+    | "W";
+
 const Home: NextPage = () => {
-    const [int, setInt] = useState("1");
+    const [int, setInt] = useState<IntervalType>("5");
     const { data: session } = useSession();
     const hello = api.hello.useQuery({ text: session?.user.name });
 
@@ -74,7 +74,7 @@ const Home: NextPage = () => {
                 </h1>
                 <div className="space-y-1 p-4 text-center">
                     <div className="flex flex-row space-x-4">
-                        <Button onClick={(_) => setInt("1")}>1 minute</Button>
+                        <Button onClick={(_) => setInt("5")}>5 minutes</Button>
                         <Button onClick={(_) => setInt("30")}>
                             30 minutes
                         </Button>

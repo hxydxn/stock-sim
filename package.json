@@ -46,7 +46,6 @@
     "react-finnhub": "^1.0.7",
     "react-hook-form": "^7.43.4",
     "react-ts-tradingview-widgets": "^1.0.14",
-    "recharts": "^2.4.3",
     "superjson": "1.9.1",
     "tailwind-merge": "^1.10.0",
     "tailwindcss-animate": "^1.0.5",
@@ -54,7 +53,6 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.31.2",
-    "@polygon.io/tradingview-adapter": "^1.0.3",
     "@types/eslint": "^8.21.1",
     "@types/node": "^18.14.6",
     "@types/prettier": "^2.7.2",
