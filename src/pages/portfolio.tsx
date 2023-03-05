@@ -5,264 +5,312 @@ import { Button } from "~/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from "~/ui/dialog";
 import { Input } from "~/ui/input";
 import { Label } from "~/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "~/ui/select";
 import { api, type RouterOutputs } from "~/utils/api";
-import { balanceRouter } from "~/server/api/routers/balance";
 import { useZodForm } from "~/utils/zod-form";
 import { Controller } from "react-hook-form";
+import { createChart } from "lightweight-charts";
+import { useEffect, useRef } from "react";
+
+enum HistorySpanProto {
+    WEEK,
+    MONTH,
+    DAY,
+}
 
 // This schema is reused on the backend
 export const balanceUpdateSchema = z.object({
-  amount: z.number().min(0.01).multipleOf(0.01),
-  type: z.nativeEnum(TransactionCategory),
+    amount: z.number().min(0.01).multipleOf(0.01),
+    type: z.nativeEnum(TransactionCategory),
 });
 
 // This schema is reused on the backend
 export const transactionCreateSchema = z.object({
-  stock: z.string().min(1).max(6),
-  amount: z.number().int().positive(),
-  price: z.number().positive().multipleOf(0.01),
-  type: z.nativeEnum(TransactionCategory),
+    stock: z.string().min(1).max(6),
+    amount: z.number().int().positive(),
+    price: z.number().positive().multipleOf(0.01),
+    type: z.nativeEnum(TransactionCategory),
 });
 
 export const transactionPutSchema = z.object({
-  stock: z.string().min(1).max(6),
-  amount: z.number().int().positive(),
-  type: z.nativeEnum(TransactionCategory),
+    stock: z.string().min(1).max(6),
+    amount: z.number().int().positive(),
+    type: z.nativeEnum(TransactionCategory),
 });
 
 function CreateAccountBalance() {
-  const { data: balance } = api.balance.byUser.useQuery();
-  const { data: possessions } = api.possession.byUser.useQuery();
+    const { data: balance } = api.balance.byUser.useQuery();
+    const { data: possessions } = api.possession.byUser.useQuery();
 
-  const methods = useZodForm({
-    schema: balanceUpdateSchema,
-  });
+    const methods = useZodForm({
+        schema: balanceUpdateSchema,
+    });
 
-  const utils = api.useContext();
+    const utils = api.useContext();
 
-  const editBalance = api.balance.update.useMutation({
-    onSettled: async () => {
-      await utils.balance.invalidate();
-      methods.reset();
-    },
-  });
+    const editBalance = api.balance.update.useMutation({
+        onSettled: async () => {
+            await utils.balance.invalidate();
+            methods.reset();
+        },
+    });
 
-  const onSubmit = methods.handleSubmit(
-    (data) => {
-      editBalance.mutate(data);
-    },
-    (e) => {
-      console.log("Whoops... something went wrong!");
-      console.error(e);
-    },
-  );
+    const onSubmit = methods.handleSubmit(
+        (data) => {
+            editBalance.mutate(data);
+        },
+        (e) => {
+            console.log("Whoops... something went wrong!");
+            console.error(e);
+        },
+    );
 
-  // const totalStockVal = possessions?.forEach((possession) => {
-  //   possession.amount * possession.stock.price
-  // }, 0);
-  // const totalVal = balance?.balance + possessions?.forEach((possession) => {
-  //   possession.amount * possession.stock.price
-  // }, 0)
-  return (
-    <div className="mx-auto max-w-xl">
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 pt-16 pb-8 ">
-        <h1 className="text-4xl font-bold">Portfolio</h1>
-        <div className="flex w-full flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20">
-          <h3 className="text-center text-2xl font-bold">
-            Total Portfolio Value
-          </h3>
-          {/* <p className="text-center">${totalVal}</p> */}
-        </div>
-        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-          <div className="flex max-w-md flex-col rounded-xl bg-white/10 p-4 hover:bg-white/20">
-            <h3 className="text-center text-xl font-bold">Current Balance</h3>
-            <p className="text-center">${balance?.balance}</p>
-            <form onSubmit={onSubmit} className="flex flex-col gap-4">
-              <div className="space-y-1">
-                <Label htmlFor="amount">Amount</Label>
-                <Input
-                  id="amount"
-                  {...methods.register("amount", { valueAsNumber: true })}
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                />
-                <p className="font-medium text-red-500">
-                  {methods.formState.errors?.amount?.message}
-                </p>
-              </div>
-              <div className="space-y-1">
-                <Label>Type</Label>
-                <Controller
-                  control={methods.control}
-                  name="type"
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger className="bg-slate-800">
-                        <SelectValue placeholder="Type of Transaction" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="DEPOSIT">Deposit</SelectItem>
-                        <SelectItem value="WITHDRAW">Withdraw</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                <p className="font-medium text-red-500">
-                  {methods.formState.errors?.type?.message}
-                </p>
-              </div>
-              <Button type="submit">Update Balance</Button>
-              <p className="font-medium text-red-500">
-                {editBalance.error?.message}
-              </p>
-            </form>
-          </div>
-          <div className="flex max-w-md flex-col rounded-xl bg-white/10 p-4 hover:bg-white/20">
-            <h3 className="text-center text-xl font-bold">
-              Current Shares Held
-            </h3>
-            <div className="text-center">
-              {possessions?.map((possession) => (
-                <PossessionCard key={possession.id} possession={possession} />
-              ))}
+    const { data: portfolioVal } =
+        api.transaction.getTotalPortfolioVal.useQuery();
+
+    // const totalVal = balance?.balance + possessions?.forEach((possession) => {
+    //   possession.amount * possession.stock.price
+    // }, 0)
+    return (
+        <div className="mx-auto max-w-xl">
+            <div className="container flex flex-col items-center justify-center gap-12 px-4 pt-16 pb-8 ">
+                <h1 className="text-4xl font-bold">Portfolio</h1>
+                <div className="flex w-full flex-col items-center gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20">
+                    <h3 className="text-center text-2xl font-bold">
+                        Total Portfolio Value
+                    </h3>
+                    <p className="text-center">${portfolioVal}</p>
+                    <Link href="/chart">
+                        <Button>View Portfolio History</Button>
+                    </Link>
+                </div>
+                <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
+                    <div className="flex max-w-md flex-col rounded-xl bg-white/10 p-4 hover:bg-white/20">
+                        <h3 className="text-center text-xl font-bold">
+                            Current Balance
+                        </h3>
+                        <p className="text-center">${balance?.balance}</p>
+                        <form
+                            onSubmit={onSubmit}
+                            className="flex flex-col gap-4"
+                        >
+                            <div className="space-y-1">
+                                <Label htmlFor="amount">Amount</Label>
+                                <Input
+                                    id="amount"
+                                    {...methods.register("amount", {
+                                        valueAsNumber: true,
+                                    })}
+                                    type="number"
+                                    step="0.01"
+                                    min="0.01"
+                                />
+                                <p className="font-medium text-red-500">
+                                    {methods.formState.errors?.amount?.message}
+                                </p>
+                            </div>
+                            <div className="space-y-1">
+                                <Label>Type</Label>
+                                <Controller
+                                    control={methods.control}
+                                    name="type"
+                                    render={({ field }) => (
+                                        <Select
+                                            value={field.value}
+                                            onValueChange={field.onChange}
+                                        >
+                                            <SelectTrigger className="bg-slate-800">
+                                                <SelectValue placeholder="Type of Transaction" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="DEPOSIT">
+                                                    Deposit
+                                                </SelectItem>
+                                                <SelectItem value="WITHDRAW">
+                                                    Withdraw
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                                <p className="font-medium text-red-500">
+                                    {methods.formState.errors?.type?.message}
+                                </p>
+                            </div>
+                            <Button type="submit">Update Balance</Button>
+                            <p className="font-medium text-red-500">
+                                {editBalance.error?.message}
+                            </p>
+                        </form>
+                    </div>
+                    <div className="flex max-w-md flex-col rounded-xl bg-white/10 p-4 hover:bg-white/20">
+                        <h3 className="text-center text-xl font-bold">
+                            Current Shares Held
+                        </h3>
+                        <div className="text-center">
+                            {possessions?.map((possession) => (
+                                <PossessionCard
+                                    key={possession.id}
+                                    possession={possession}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                <div className="flex w-full flex-col rounded-xl bg-white/10 p-4">
+                    <h3 className="text-center text-2xl font-bold">
+                        Past Transactions
+                    </h3>
+                </div>
             </div>
-          </div>
         </div>
-        <div className="flex w-full flex-col rounded-xl bg-white/10 p-4">
-          <h3 className="text-center text-2xl font-bold">Past Transactions</h3>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }
 
 function TransactionCard(props: {
-  transaction: RouterOutputs["transaction"]["getAll"][number];
+    transaction: RouterOutputs["transaction"]["getAll"][number];
 }) {
-  const { transaction } = props;
+    const { transaction } = props;
 
-  return (
-    <div className="flex flex-row rounded-lg bg-white/10 p-4 transition-all hover:scale-[101%]">
-      <div className="flex-grow">
-        <div className="flex flex-row justify-between">
-          <h2 className="text-2xl font-bold">{transaction.stock}</h2>
-          <h1 className="text-gray text-xl font-bold">{transaction.type}</h1>
+    return (
+        <div className="flex flex-row rounded-lg bg-white/10 p-4 transition-all hover:scale-[101%]">
+            <div className="flex-grow">
+                <div className="flex flex-row justify-between">
+                    <h2 className="text-2xl font-bold">{transaction.stock}</h2>
+                    <h1 className="text-gray text-xl font-bold">
+                        {transaction.type}
+                    </h1>
+                </div>
+                <p className="mt-2 text-sm">
+                    {transaction.amount} shares @ ${transaction.price}
+                </p>
+            </div>
         </div>
-        <p className="mt-2 text-sm">
-          {transaction.amount} shares @ ${transaction.price}
-        </p>
-      </div>
-    </div>
-  );
+    );
 }
 
 function PossessionCard(props: {
-  possession: RouterOutputs["possession"]["byUser"][number];
+    possession: RouterOutputs["possession"]["byUser"][number];
 }) {
-  const { possession } = props;
-  return (
-    <div className="grid grid-cols-2 flex-row rounded-lg">
-      <div>${possession.stock}</div>
-      <div>{possession.amount}</div>
-    </div>
-  );
+    const { possession } = props;
+    return (
+        <div className="grid grid-cols-2 flex-row rounded-lg">
+            <div>${possession.stock}</div>
+            <div>{possession.amount}</div>
+        </div>
+    );
 }
 
 export default function PortfolioPage() {
-  const { data: session } = useSession();
-  const hello = api.hello.useQuery({ text: session?.user.name });
-  const { data: transactions } = api.transaction.getAll.useQuery();
-  if (session) {
-    return (
-      <main className="">
-        <nav className="container mx-auto flex flex-wrap items-center justify-between p-4">
-          <Link href="/" className="flex items-center">
-            <Image
-              src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg"
-              alt="Rocket logo"
-              width={32}
-              height={32}
-            ></Image>
-          </Link>
-          <div className="flex items-center space-x-4">
-            <p>{hello.data ? hello.data.greeting : "Loading tRPC query..."}</p>
-            <div className="flex flex-col items-center justify-center gap-4">
-              <Button
-                variant="ghost"
-                onClick={session ? () => signOut() : () => signIn()}
-              >
-                {session ? "Sign out" : "Sign in"}
-              </Button>
-            </div>
-            <div className={session ? "" : "hidden"}>
-              <Link href="/portfolio">
-                <Button variant="destructive">Portfolio</Button>
-              </Link>
-            </div>
-          </div>
-        </nav>
-        <CreateAccountBalance />
+    const { data: session } = useSession();
+    const hello = api.hello.useQuery({ text: session?.user.name });
+    const { data: transactions } = api.transaction.getAll.useQuery();
+    if (session) {
+        return (
+            <main className="">
+                <nav className="container mx-auto flex flex-wrap items-center justify-between p-4">
+                    <Link href="/" className="flex items-center">
+                        <Image
+                            src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg"
+                            alt="Rocket logo"
+                            width={32}
+                            height={32}
+                        ></Image>
+                    </Link>
+                    <div className="flex items-center space-x-4">
+                        <p>
+                            {hello.data
+                                ? hello.data.greeting
+                                : "Loading tRPC query..."}
+                        </p>
+                        <div className="flex flex-col items-center justify-center gap-4">
+                            <Button
+                                variant="ghost"
+                                onClick={
+                                    session ? () => signOut() : () => signIn()
+                                }
+                            >
+                                {session ? "Sign out" : "Sign in"}
+                            </Button>
+                        </div>
+                        <div className={session ? "" : "hidden"}>
+                            <Link href="/portfolio">
+                                <Button variant="destructive">Portfolio</Button>
+                            </Link>
+                        </div>
+                    </div>
+                </nav>
+                <CreateAccountBalance />
 
-        <div className="mx-auto flex max-w-xl flex-col gap-4">
-          {transactions?.map((transaction) => (
-            <TransactionCard key={transaction.id} transaction={transaction} />
-          ))}
-        </div>
-      </main>
-    );
-  } else {
-    return (
-      <main className="">
-        <nav className="container mx-auto flex flex-wrap items-center justify-between p-4">
-          <Link href="/" className="flex items-center">
-            <Image
-              src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg"
-              alt="Rocket logo"
-              width={32}
-              height={32}
-            ></Image>
-          </Link>
-          <div className="flex items-center space-x-4">
-            <p>{hello.data ? hello.data.greeting : "Loading tRPC query..."}</p>
-            <div className="flex flex-col items-center justify-center gap-4">
-              <Button
-                variant="ghost"
-                onClick={session ? () => signOut() : () => signIn()}
-              >
-                {session ? "Sign out" : "Sign in"}
-              </Button>
-            </div>
-            <div className={session ? "" : "hidden"}>
-              <Link href="/portfolio">
-                <Button variant="destructive">Portfolio</Button>
-              </Link>
-            </div>
-          </div>
-        </nav>
-        <div className="mx-auto flex max-w-xl flex-col gap-4 p-4 text-center">
-          <h1 className="text-4xl font-bold">Portfolio</h1>
-          <p className="text-xl">Please sign in to view your portfolio</p>
-        </div>
-      </main>
-    );
-  }
+                <div className="mx-auto flex max-w-xl flex-col gap-4">
+                    {transactions?.map((transaction) => (
+                        <TransactionCard
+                            key={transaction.id}
+                            transaction={transaction}
+                        />
+                    ))}
+                </div>
+            </main>
+        );
+    } else {
+        return (
+            <main className="">
+                <nav className="container mx-auto flex flex-wrap items-center justify-between p-4">
+                    <Link href="/" className="flex items-center">
+                        <Image
+                            src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg"
+                            alt="Rocket logo"
+                            width={32}
+                            height={32}
+                        ></Image>
+                    </Link>
+                    <div className="flex items-center space-x-4">
+                        <p>
+                            {hello.data
+                                ? hello.data.greeting
+                                : "Loading tRPC query..."}
+                        </p>
+                        <div className="flex flex-col items-center justify-center gap-4">
+                            <Button
+                                variant="ghost"
+                                onClick={
+                                    session ? () => signOut() : () => signIn()
+                                }
+                            >
+                                {session ? "Sign out" : "Sign in"}
+                            </Button>
+                        </div>
+                        <div className={session ? "" : "hidden"}>
+                            <Link href="/portfolio">
+                                <Button variant="destructive">Portfolio</Button>
+                            </Link>
+                        </div>
+                    </div>
+                </nav>
+                <div className="mx-auto flex max-w-xl flex-col gap-4 p-4 text-center">
+                    <h1 className="text-4xl font-bold">Portfolio</h1>
+                    <p className="text-xl">
+                        Please sign in to view your portfolio
+                    </p>
+                </div>
+            </main>
+        );
+    }
 }

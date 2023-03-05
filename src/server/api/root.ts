@@ -4,6 +4,7 @@ import { transactionRouter } from "./routers/transaction";
 import { possessionRouter } from "./routers/possession";
 import { balanceRouter } from "./routers/balance";
 import { createTRPCRouter, publicProcedure } from "./trpc";
+import { historyRouter } from "./routers/history";
 
 /**
  * This is the primary router for your server.
@@ -22,6 +23,7 @@ export const appRouter = createTRPCRouter({
   transaction: transactionRouter,
   possession: possessionRouter,
   balance: balanceRouter,
+  history: historyRouter,
 });
 
 // export type definition of API

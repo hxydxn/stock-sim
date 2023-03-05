@@ -32,6 +32,7 @@ specifiers:
   eslint-config-next: ^13.2.3
   lightweight-charts: ^4.0.0
   lucide-react: ^0.119.0
+  moment: ^2.29.4
   next: ^13.2.3
   next-auth: ^4.20.1
   postcss: ^8.4.21
@@ -75,6 +76,7 @@ dependencies:
   clsx: 1.2.1
   lightweight-charts: 4.0.0
   lucide-react: 0.119.0_react@18.2.0
+  moment: 2.29.4
   next: 13.2.3_6m24vuloj5ihw4zc5lbsktc4fu
   next-auth: 4.20.1_nvzgbose6yf6w7ijjprgspqefi
   prop-types: 15.8.1
@@ -3608,6 +3610,10 @@ packages:
       pkg-types: 1.0.2
       ufo: 1.1.1
     dev: true
+
+  /moment/2.29.4:
+    resolution: {integrity: sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==}
+    dev: false
 
   /ms/2.0.0:
     resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}

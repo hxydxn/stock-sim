@@ -79,14 +79,6 @@ model User {
   possessions   Possession[]
 }
 
-// model Balance {
-//   id         String   @id @default(cuid())
-//   balance    Float    @default(100000.00)
-//   ModifiedAt DateTime @default(now())
-//   userId     String   @unique
-//   user       User     @relation(fields: [userId], references: [id])
-// }
-
 model Transaction {
   id        String              @id @default(cuid())
   stock     String

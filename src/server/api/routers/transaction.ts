@@ -4,7 +4,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { restClient } from "@polygon.io/client-js";
 
-export const polygon = async (symbol: string) => {
+export const polygonLatest = async (symbol: string) => {
   const rest = restClient(process.env.POLYGON_API_KEY);
   try {
     const response = await rest.stocks.previousClose(symbol);
@@ -26,6 +26,29 @@ export const polygon = async (symbol: string) => {
 };
 
 export const transactionRouter = createTRPCRouter({
+  getTotalPortfolioVal: protectedProcedure.query(async ({ ctx }) => {
+    const possessions = await ctx.prisma.possession.findMany({
+      where: {
+        userId: ctx.session.user.id,
+      },
+    });
+    const balance = await ctx.prisma.user.findFirst({
+      where: {
+        id: ctx.session.user.id,
+      },
+      select: { balance: true },
+    });
+    let total = 0;
+    if (balance) {
+      total += balance.balance;
+    }
+    for (const possession of possessions) {
+      const price = await polygonLatest(possession.stock);
+      total += price * possession.amount;
+    }
+    return total;
+  }),
+
   getAll: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.transaction.findMany({
       orderBy: {
@@ -50,7 +73,7 @@ export const transactionRouter = createTRPCRouter({
   create: protectedProcedure
     .input(transactionPutSchema)
     .mutation(async ({ ctx, input }) => {
-      const price = await polygon(input.stock);
+      const price = await polygonLatest(input.stock);
       const currentAmount = await ctx.prisma.possession.findFirst({
         select: { amount: true, id: true },
         where: {
@@ -133,6 +156,15 @@ export const transactionRouter = createTRPCRouter({
               user: { connect: { id: ctx.session.user.id } },
               stock: input.stock,
               amount: input.amount,
+            },
+          });
+
+          await ctx.prisma.user.update({
+            where: {
+              id: currentBalance.id,
+            },
+            data: {
+              balance: currentBalance.balance - input.amount * price,
             },
           });
         }
