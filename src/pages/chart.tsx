@@ -45,6 +45,7 @@ export default function Chart() {
                 topColor: "#2962FF",
                 bottomColor: "rgba(41,98,255,0.28)",
             });
+            // data has to equal VolumeOverTime[]
             const d2 = data.map((d) => {
                 return { time: d.time! / 1000, value: d.value! };
             });
