@@ -1,4 +1,4 @@
-import { signIn, signOut, useSession } from "next-auth/client";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { Button } from "~/ui/button";
 
 export const AuthShowcase: React.FC = () => {

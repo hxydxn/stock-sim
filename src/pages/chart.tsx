@@ -1,19 +1,15 @@
 import { api } from "~/utils/api";
 import { useZodForm } from "~/utils/zod-form";
-import { z } from "zod";
 import type { IChartApi } from "lightweight-charts";
 import { ColorType, createChart } from "lightweight-charts";
 import { useRef, useState } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
-import Link from "next/link";
-import Image from "next/image";
-import { Button } from "~/ui/button";
+import { useSession } from "next-auth/react";
 import type { ValueOverTime } from "~/server/api/types/history";
 import { HistorySpan, HistorySchema } from "~/server/api/types/history";
+import { NavBar } from "~/components/NavBar";
 
 export default function Chart() {
     const { data: session } = useSession();
-    const hello = api.hello.useQuery({ text: session?.user.name });
     const [rem, setRem] = useState<IChartApi | null>(null);
     const charTainerRef = useRef();
     const opts = api.history.getStocks.useQuery();
@@ -59,38 +55,7 @@ export default function Chart() {
     if (session) {
         return (
             <main className="">
-                <nav className="container mx-auto flex flex-wrap items-center justify-between p-4">
-                    <Link href="/" className="flex items-center">
-                        <Image
-                            src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg"
-                            alt="Rocket logo"
-                            width={32}
-                            height={32}
-                        ></Image>
-                    </Link>
-                    <div className="flex items-center space-x-4">
-                        <p>
-                            {hello.data
-                                ? hello.data.greeting
-                                : "Loading tRPC query..."}
-                        </p>
-                        <div className="flex flex-col items-center justify-center gap-4">
-                            <Button
-                                variant="ghost"
-                                onClick={
-                                    session ? () => signOut() : () => signIn()
-                                }
-                            >
-                                {session ? "Sign out" : "Sign in"}
-                            </Button>
-                        </div>
-                        <div className={session ? "" : "hidden"}>
-                            <Link href="/portfolio">
-                                <Button variant="destructive">Portfolio</Button>
-                            </Link>
-                        </div>
-                    </div>
-                </nav>
+                <NavBar />
                 <div className="mx-auto max-w-xl">
                     <div className="container flex flex-col items-center justify-center gap-12 px-4 pt-16 pb-8 ">
                         <div>
@@ -127,38 +92,7 @@ export default function Chart() {
     } else {
         return (
             <main className="">
-                <nav className="container mx-auto flex flex-wrap items-center justify-between p-4">
-                    <Link href="/" className="flex items-center">
-                        <Image
-                            src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg"
-                            alt="Rocket logo"
-                            width={32}
-                            height={32}
-                        ></Image>
-                    </Link>
-                    <div className="flex items-center space-x-4">
-                        <p>
-                            {hello.data
-                                ? hello.data.greeting
-                                : "Loading tRPC query..."}
-                        </p>
-                        <div className="flex flex-col items-center justify-center gap-4">
-                            <Button
-                                variant="ghost"
-                                onClick={
-                                    session ? () => signOut() : () => signIn()
-                                }
-                            >
-                                {session ? "Sign out" : "Sign in"}
-                            </Button>
-                        </div>
-                        <div className={session ? "" : "hidden"}>
-                            <Link href="/portfolio">
-                                <Button variant="destructive">Portfolio</Button>
-                            </Link>
-                        </div>
-                    </div>
-                </nav>
+                <NavBar />
                 <div className="mx-auto flex max-w-xl flex-col gap-4 p-4 text-center">
                     <h1 className="text-4xl font-bold">Portfolio History</h1>
                     <p className="text-xl">

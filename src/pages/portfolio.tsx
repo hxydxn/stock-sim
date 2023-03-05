@@ -1,7 +1,6 @@
-import { signIn, signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { Button } from "~/ui/button";
 import Link from "next/link";
-import Image from "next/image";
 import { Input } from "~/ui/input";
 import { Label } from "~/ui/label";
 import {
@@ -15,6 +14,7 @@ import { api, type RouterOutputs } from "~/utils/api";
 import { useZodForm } from "~/utils/zod-form";
 import { Controller } from "react-hook-form";
 import { balanceUpdateSchema } from "~/server/api/types/balance";
+import { NavBar } from "~/components/NavBar";
 
 function CreateAccountBalance() {
     const { data: balance } = api.balance.byUser.useQuery();
@@ -178,43 +178,11 @@ function PossessionCard(props: {
 
 export default function PortfolioPage() {
     const { data: session } = useSession();
-    const hello = api.hello.useQuery({ text: session?.user.name });
     const { data: transactions } = api.transaction.getAll.useQuery();
     if (session) {
         return (
             <main className="">
-                <nav className="container mx-auto flex flex-wrap items-center justify-between p-4">
-                    <Link href="/" className="flex items-center">
-                        <Image
-                            src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg"
-                            alt="Rocket logo"
-                            width={32}
-                            height={32}
-                        ></Image>
-                    </Link>
-                    <div className="flex items-center space-x-4">
-                        <p>
-                            {hello.data
-                                ? hello.data.greeting
-                                : "Loading tRPC query..."}
-                        </p>
-                        <div className="flex flex-col items-center justify-center gap-4">
-                            <Button
-                                variant="ghost"
-                                onClick={
-                                    session ? () => signOut() : () => signIn()
-                                }
-                            >
-                                {session ? "Sign out" : "Sign in"}
-                            </Button>
-                        </div>
-                        <div className={session ? "" : "hidden"}>
-                            <Link href="/portfolio">
-                                <Button variant="destructive">Portfolio</Button>
-                            </Link>
-                        </div>
-                    </div>
-                </nav>
+                <NavBar />
                 <CreateAccountBalance />
 
                 <div className="mx-auto flex max-w-xl flex-col gap-4">
@@ -230,38 +198,7 @@ export default function PortfolioPage() {
     } else {
         return (
             <main className="">
-                <nav className="container mx-auto flex flex-wrap items-center justify-between p-4">
-                    <Link href="/" className="flex items-center">
-                        <Image
-                            src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f680.svg"
-                            alt="Rocket logo"
-                            width={32}
-                            height={32}
-                        ></Image>
-                    </Link>
-                    <div className="flex items-center space-x-4">
-                        <p>
-                            {hello.data
-                                ? hello.data.greeting
-                                : "Loading tRPC query..."}
-                        </p>
-                        <div className="flex flex-col items-center justify-center gap-4">
-                            <Button
-                                variant="ghost"
-                                onClick={
-                                    session ? () => signOut() : () => signIn()
-                                }
-                            >
-                                {session ? "Sign out" : "Sign in"}
-                            </Button>
-                        </div>
-                        <div className={session ? "" : "hidden"}>
-                            <Link href="/portfolio">
-                                <Button variant="destructive">Portfolio</Button>
-                            </Link>
-                        </div>
-                    </div>
-                </nav>
+                <NavBar />
                 <div className="mx-auto flex max-w-xl flex-col gap-4 p-4 text-center">
                     <h1 className="text-4xl font-bold">Portfolio</h1>
                     <p className="text-xl">
