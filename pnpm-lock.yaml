@@ -30,7 +30,7 @@ specifiers:
   eslint: ^8.35.0
   eslint-config-next: ^13.2.3
   lightweight-charts: ^4.0.0
-  lucide-react: ^0.119.0
+  lucide-react: ^0.130.0
   moment: ^2.29.4
   next: ^13.2.3
   next-auth: ^4.20.1
@@ -73,7 +73,7 @@ dependencies:
   class-variance-authority: 0.4.0_typescript@4.9.5
   clsx: 1.2.1
   lightweight-charts: 4.0.0
-  lucide-react: 0.119.0_react@18.2.0
+  lucide-react: 0.130.0_react@18.2.0
   moment: 2.29.4
   next: 13.2.3_6m24vuloj5ihw4zc5lbsktc4fu
   next-auth: 4.20.1_nvzgbose6yf6w7ijjprgspqefi
@@ -3400,8 +3400,8 @@ packages:
     dependencies:
       yallist: 4.0.0
 
-  /lucide-react/0.119.0_react@18.2.0:
-    resolution: {integrity: sha512-HpudADtrP1Its8ZwbtI643jJ3vWvqoUhn6rKFPCTmT1S0dh0NwUmSrjQSKSONoB3v7sqI9HZ7Cb/3hV6glASGQ==}
+  /lucide-react/0.130.0_react@18.2.0:
+    resolution: {integrity: sha512-9RrBRQAxx7SZUpV7z0T0XLR6EWMydd+G77WijyKmK1+MW9Icx0PM+/HstiMSsi/3EIyw7RgMIV9BO0+iUfZYtA==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0
     dependencies:
